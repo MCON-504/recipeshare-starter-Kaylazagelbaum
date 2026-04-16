@@ -44,3 +44,10 @@ def create_recipe():
     db.session.commit()
 
     return jsonify(recipe.to_dict()), 201
+
+@main.route("/api/recipes/<int:recipe_id>", methods=["DELETE"])
+def delete_recipe(recipe_id :int):
+    recipe = Recipe.query.get_or_404(recipe_id)
+    db.session.delete(recipe)
+    db.session.commit()
+    return {"message": "Recipe deleted"}, 204
