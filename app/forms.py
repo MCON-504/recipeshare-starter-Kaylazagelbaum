@@ -24,3 +24,19 @@ class RecipeForm(FlaskForm):
     )
     submit = SubmitField()
 
+class FeedbackForm(FlaskForm):
+    name = StringField(
+        "Name",
+        validators=[DataRequired(), Length(min=2, max=80)])
+    email = StringField(
+        "Email",
+        validators = [DataRequired(), Email(), Length(max=120)])
+    message = TextAreaField(
+        "Message",
+        validators=[DataRequired(), Length(min=10, max=500)])
+    topic = StringField(
+        "Topic",
+        validators=[DataRequired(), Length(max=100)])
+
+    submit = SubmitField("Send Feedback")
+

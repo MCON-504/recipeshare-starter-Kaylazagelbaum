@@ -2,8 +2,8 @@ from flask import Blueprint, jsonify, request, render_template, redirect, url_fo
 from flask_login import login_required, current_user
 
 from .extensions import db
-from .models import Recipe
-from .forms import RecipeForm
+from .models import Recipe, Profile
+from .forms import RecipeForm, FeedbackForm
 
 main_bp = Blueprint("main_bp", __name__)
 
@@ -102,6 +102,26 @@ def delete_recipe(recipe_id: int):
     db.session.delete(recipe)
     db.session.commit()
     return "", 204
+
+@main_bp.route("/feedback", methods=["GET", "POST"])
+def feedback():
+    form = FeedbackForm()
+
+    if form.validate_on_submit():
+        flash(f"Thanks, {form.name.data}! We received your feedback.", "success")
+        return redirect(url_for("main_bp.feedback"))
+
+    return render_template("feedback.html", form=form)
+
+@main_bp.route("/profile", methods=["GET", "POST"])
+def profile():
+    form = Profile()
+
+    if form.validate_on_submit():
+        flash(f"Thanks, {form.name.data}! It's great to learn more about you.", "success")
+        return redirect(url_for("main_bp.profile"))
+
+    return render_template("profile_form.html", form=form)
 
 
 
