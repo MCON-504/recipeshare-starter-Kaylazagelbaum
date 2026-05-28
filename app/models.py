@@ -12,7 +12,7 @@ class User(UserMixin, db.Model):
     id            = db.Column(db.Integer, primary_key=True)
     username      = db.Column(db.String(80),  nullable=False, unique=True)
     email         = db.Column(db.String(120), nullable=False, unique=True)
-    password_hash = db.Column(db.String(256), nullable=False)
+    password_hash = db.Column(db.String(256), nullable=True)
 
     recipes = db.relationship("Recipe", back_populates="author", lazy=True)
 
@@ -70,4 +70,4 @@ class Profile(db.Model):
     years_cooking = db.Column(db.Integer)
 
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
-    user = db.relationship("Users", backref=db.backref("profile", uselist=False))
+    user = db.relationship("User", backref=db.backref("profile", uselist=False))

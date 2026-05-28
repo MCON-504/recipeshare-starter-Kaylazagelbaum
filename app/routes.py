@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 
 from .extensions import db
 from .models import Recipe, Profile
-from .forms import RecipeForm, FeedbackForm
+from .forms import RecipeForm, FeedbackForm, ProfileForm
 
 main_bp = Blueprint("main_bp", __name__)
 
@@ -59,6 +59,10 @@ def create_recipe():
 
         return jsonify(recipe.to_dict()), 201
 
+@main_bp.route("/new_recipe", methods=["GET","POST"])
+@login_required
+def new_recipe():
+
     form = RecipeForm()
 
     if form.validate_on_submit():
@@ -66,13 +70,15 @@ def create_recipe():
             title=form.title.data.strip(),
             description=form.description.data.strip(),
             instructions=form.instructions.data.strip(),
-            prep_time=form.prep_time.data.strip(),
+            prep_time=form.prep_time.data,
             author=current_user,
         )
         db.session.add(recipe)
         db.session.commit()
-    flash("Recipe successfully created!", "success")
-    return redirect(url_for("main_bp.get_recipe(recipe.id)"))
+        flash("Recipe successfully created!", "success")
+        return redirect((url_for("main_bp.get_recipes")))
+
+    return render_template("recipe_form.html", form=form)
 
 
 
@@ -114,12 +120,24 @@ def feedback():
     return render_template("feedback.html", form=form)
 
 @main_bp.route("/profile", methods=["GET", "POST"])
+@login_required
 def profile():
-    form = Profile()
+    profile = current_user.profile
+    form = ProfileForm(obj=profile)
 
     if form.validate_on_submit():
-        flash(f"Thanks, {form.name.data}! It's great to learn more about you.", "success")
-        return redirect(url_for("main_bp.profile"))
+        if profile is None:
+            profile = Profile(user=current_user)
+            db.session.add(profile)
+
+        profile.display_name = form.display_name.data.strip()
+        profile.bio = (form.bio.data or "").strip() or None
+        profile.favorite_cuisine = (form.favorite_cuisine.data or "").strip() or None
+        profile.years_cooking = form.years_cooking.data
+
+        db.session.commit()
+        flash(f"Profile saved successfully.", "success")
+        return redirect(url_for("main_bp.get_recipes"))
 
     return render_template("profile_form.html", form=form)
 
