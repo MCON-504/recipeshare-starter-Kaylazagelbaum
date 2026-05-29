@@ -71,3 +71,14 @@ class Profile(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
     user = db.relationship("User", backref=db.backref("profile", uselist=False))
+
+class RecipeReview(db.Model):
+    __tablename__ = "reviews"
+    id = db.Column(db.Integer, primary_key=True)
+    rating = db.Column(db.Integer, nullable=False)
+    comment = db.column(db.String(100))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
+
+    recipe = db.relationship("Recipe", backref=db.backref("reviews", uselist=False))

@@ -46,3 +46,6 @@ class ProfileForm(FlaskForm):
     favorite_cuisine = StringField("Favorite Cuisine")
     years_cooking = IntegerField("Years Cooking", validators=[Optional(), NumberRange(min=0, max=100)])
     submit = SubmitField("Save Profile")
+
+class RecipeReviewForm(FlaskForm):
+    pass

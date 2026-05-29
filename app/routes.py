@@ -142,4 +142,7 @@ def profile():
     return render_template("profile_form.html", form=form)
 
 
-
+@main_bp.route("/review", methods=["GET", "POST"])
+@login_required
+def review():
+    pass

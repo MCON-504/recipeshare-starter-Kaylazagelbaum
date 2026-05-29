@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="recipe-form-card">
+
+
+
+
+
+
+
+
+
+
+</section>
+
+<style>
+    .recipe-form-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        max-width: 600px;
+        margin: 3rem auto;
+        padding: 2.5rem 2.25rem;
+    }
+    .recipe-form-card h1 { font-size: 1.6rem; margin-bottom: .35rem; }
+    .recipe-form-card .muted { color: var(--muted); font-size: .92rem; margin-bottom: 1.75rem; }
+    textarea.form-control { min-height: 110px; resize: vertical; }
+</style>
+{% endblock %}
