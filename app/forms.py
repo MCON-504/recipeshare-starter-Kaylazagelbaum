@@ -48,4 +48,10 @@ class ProfileForm(FlaskForm):
     submit = SubmitField("Save Profile")
 
 class RecipeReviewForm(FlaskForm):
-    pass
+    rating = IntegerField(
+        "Rating",
+        validators=[DataRequired(), NumberRange(min=1, max=5)])
+    comment = TextAreaField(
+        "Comment",
+        validators=[DataRequired(), Length(min=10, max=300)])
+    submit = SubmitField("Submit Review")
