@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 
 from .extensions import db
 from .models import Recipe, Profile
-from .forms import RecipeForm, FeedbackForm, ProfileForm
+from .forms import RecipeForm, FeedbackForm, ProfileForm, RecipeReviewForm
 
 main_bp = Blueprint("main_bp", __name__)
 
@@ -39,25 +39,24 @@ def get_recipe_new(recipe_id: int):
 @login_required
 def create_recipe():
     data = request.get_json() or {}
-    if request.is_json:
 
-        required_fields = ["title", "description", "instructions", "prep_time"]
-        missing = [field for field in required_fields if field not in data]
-        if missing:
-            return {"error": f"Missing required fields: {', '.join(missing)}"}, 400
+    required_fields = ["title", "description", "instructions", "prep_time"]
+    missing = [field for field in required_fields if field not in data]
+    if missing:
+        return {"error": f"Missing required fields: {', '.join(missing)}"}, 400
 
-        recipe = Recipe(
-            title=data["title"],
-            description=data["description"],
-            instructions=data["instructions"],
-            prep_time=data["prep_time"],
-            author=current_user,
+    recipe = Recipe(
+        title=data["title"],
+        description=data["description"],
+        instructions=data["instructions"],
+        prep_time=data["prep_time"],
+        author=current_user,
         )
 
-        db.session.add(recipe)
-        db.session.commit()
+    db.session.add(recipe)
+    db.session.commit()
 
-        return jsonify(recipe.to_dict()), 201
+    return jsonify(recipe.to_dict()), 201
 
 @main_bp.route("/new_recipe", methods=["GET","POST"])
 @login_required
@@ -67,9 +66,9 @@ def new_recipe():
 
     if form.validate_on_submit():
         recipe = Recipe(
-            title=form.title.data.strip(),
-            description=form.description.data.strip(),
-            instructions=form.instructions.data.strip(),
+            title=form.title.data,
+            description=form.description.data,
+            instructions=form.instructions.data,
             prep_time=form.prep_time.data,
             author=current_user,
         )
@@ -142,7 +141,26 @@ def profile():
     return render_template("profile_form.html", form=form)
 
 
-@main_bp.route("/review", methods=["GET", "POST"])
+@main_bp.route("/recipes/<recipe_id>/review", methods=["GET", "POST"])
 @login_required
-def review():
-    pass
+def review(recipe_id: int):
+    recipe = Recipe.query.get_or_404(recipe_id)
+    form = RecipeReviewForm()
+
+    if form.validate_on_submit():
+        review = RecipeReviewForm()
+
+        review.id = current_user.id
+        review.recipe_id = recipe.id
+        review.rating = form.rating.data
+        review.comment = (form.comment.data or "").strip() or None
+
+        db.session.add(review)
+        db.session.commit()
+        flash("Thank you for your review!")
+        return redirect(
+            url_for("main_bp.get_recipe", recipe_id = recipe.id)
+        )
+    return render_template("review_form.html", form=form, recipe=recipe)
+
+

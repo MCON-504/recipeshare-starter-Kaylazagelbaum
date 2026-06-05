@@ -7,7 +7,7 @@ from .forms import RegistrationForm, LoginForm
 from . import auth_bp
 from urllib.parse import urlparse
 
-def is_safe_url(target: str) -> bool:
+def is_safe_url(target):
     parsed = urlparse(target)
     return not parsed.netloc and parsed.path.startswith("/")
 
@@ -78,8 +78,9 @@ def login():
 
         login_user(user, remember=form.remember_me.data)
         flash(f"Welcome back, {user.username}! You are now logged in.", "success")
+        next_url = None
         next_url =  request.args.get("next")
-        if is_safe_url(next_url):
+        if next_url and is_safe_url(next_url):
             return redirect(next_url)
         return redirect(url_for("main_bp.get_recipes"))
 

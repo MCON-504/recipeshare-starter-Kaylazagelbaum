@@ -1,6 +1,7 @@
 from datetime import datetime, UTC
 
 from flask_login import UserMixin
+from sqlalchemy.orm import backref
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from .extensions import db
@@ -74,11 +75,16 @@ class Profile(db.Model):
 
 class RecipeReview(db.Model):
     __tablename__ = "reviews"
+
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer, nullable=False)
     comment = db.column(db.String(100))
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC), nullable=False)
-    recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id"), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, unique=True)
 
-    recipe = db.relationship("Recipe", backref=db.backref("reviews", uselist=False))
+    recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id"), nullable=False, unique=False)
+    recipe = db.relationship("Recipe", backref=db.backref("reviews", lazy=True))
+
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user = db.relationship("User", backref=db.backref("reviews", lazy=True))
+
+

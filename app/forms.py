@@ -41,11 +41,16 @@ class FeedbackForm(FlaskForm):
     submit = SubmitField("Send Feedback")
 
 class ProfileForm(FlaskForm):
-    display_name = StringField("Display Name", validators=[DataRequired(), Length(min=2, max=80)])
-    bio = TextAreaField("Bio", validators=[Optional(), Length(max=80)])
-    favorite_cuisine = StringField("Favorite Cuisine")
-    years_cooking = IntegerField("Years Cooking", validators=[Optional(), NumberRange(min=0, max=100)])
-    submit = SubmitField("Save Profile")
+    display_name = StringField(
+        "Display Name", validators=[DataRequired(), Length(min=2, max=80)])
+    bio = TextAreaField(
+        "Bio", validators=[Optional(), Length(max=80)])
+    favorite_cuisine = StringField(
+        "Favorite Cuisine")
+    years_cooking = IntegerField(
+        "Years Cooking", validators=[Optional(), NumberRange(min=0, max=100)])
+    submit = SubmitField(
+        "Save Profile")
 
 class RecipeReviewForm(FlaskForm):
     rating = IntegerField(
