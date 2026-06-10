@@ -78,7 +78,7 @@ class RecipeReview(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer, nullable=False)
-    comment = db.column(db.String(100))
+    comment = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(UTC), nullable=False)
 
     recipe_id = db.Column(db.Integer, db.ForeignKey("recipes.id"), nullable=False, unique=False)

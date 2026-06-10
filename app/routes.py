@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request, render_template, redirect, url_fo
 from flask_login import login_required, current_user
 
 from .extensions import db
-from .models import Recipe, Profile
+from .models import Recipe, Profile, RecipeReview
 from .forms import RecipeForm, FeedbackForm, ProfileForm, RecipeReviewForm
 
 main_bp = Blueprint("main_bp", __name__)
@@ -24,10 +24,11 @@ def get_recipes():
 @main_bp.route("/recipes/<int:recipe_id>", methods=["GET"])
 def get_recipe(recipe_id: int):
     recipe = Recipe.query.get_or_404(recipe_id)
+    reviews = RecipeReview.query.filter_by(recipe_id = recipe.id).all()
     if request.is_json:
         return jsonify(recipe.to_dict())
     else:
-        return  render_template("recipe_detail.html", recipe=recipe)
+        return  render_template("recipe_detail.html", recipe=recipe, reviews=reviews)
 
 @main_bp.route("/recipes/new", methods=["GET", "POST"])
 @login_required
@@ -148,12 +149,11 @@ def review(recipe_id: int):
     form = RecipeReviewForm()
 
     if form.validate_on_submit():
-        review = RecipeReviewForm()
-
-        review.id = current_user.id
-        review.recipe_id = recipe.id
-        review.rating = form.rating.data
-        review.comment = (form.comment.data or "").strip() or None
+        review = RecipeReview(
+            rating=form.rating.data,
+            comment=form.comment.data.strip(),
+            user=current_user,
+            recipe=recipe)
 
         db.session.add(review)
         db.session.commit()

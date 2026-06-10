@@ -1,6 +1,9 @@
 import pytest
 from app import create_app
 from app.extensions import db
+from app.models import Recipe
+from app.models import RecipeReview
+
 
 
 # ── Fixtures ──────────────────────────────────────────
@@ -189,3 +192,57 @@ def test_delete_recipe_forbidden_for_other_user(client):
     rv = client.delete(f"/api/recipes/{created['id']}")
     assert rv.status_code == 403
 
+
+# NEW TESTS
+def test_review_requires_login(client):
+    recipe = Recipe(title="Test", description="D", instructions="I", prep_time=5, user_id=1)
+    db.session.add(recipe)
+    db.session.commit()
+
+    response = client.post(
+        f"/api/recipes/<recipe_id>/review",
+        json={"rating":5, "comment": "Great!"}
+    )
+
+    assert response.status_code in (302,401,403)
+
+def test_review_submission_success(client):
+    # Register and login
+    register_and_login(client)
+    client.post("/auth/login", json={
+        "username": "alice",
+        "password": "s3cret!!"
+    })
+
+    # Create recipe
+    recipe_response = client.post("/api/recipes", json={
+        "title": "Cheesecake",
+        "description": "Dairy and Delicious",
+        "instructions": "Mix ingredients, bake, and refrigerate.",
+        "prep_time": 45
+    })
+
+    assert recipe_response.status_code == 201
+
+    recipe_id = recipe_response.get_json()["id"]
+
+    # Submit review
+    review_response = client.post(
+        f"/api/recipes/{recipe_id}/review",
+        data={
+            "rating": 5,
+            "comment": "Excellent recipe!"
+        },
+        follow_redirects=True
+    )
+
+    assert review_response.status_code == 200
+
+    with client.application.app_context():
+        review = RecipeReview.query.filter_by(
+            recipe_id=recipe_id,
+            comment="Excellent recipe!"
+        ).first()
+
+        assert review is not None
+        assert review.rating == 5
